@@ -117,8 +117,8 @@ export default function GameRoom({ roomId }: Props) {
         </div>
       )}
 
-      {/* ── Table (fills available width, fixed height) ── */}
-      <div className="shrink-0 w-full px-4 pt-3">
+      {/* ── Table ── */}
+      <div className="shrink-0 w-full px-4 pt-2 max-h-[42vh] overflow-visible">
         <PokerTable state={gameState} playerId={playerId ?? ''} />
       </div>
 

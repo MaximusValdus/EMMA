@@ -18,8 +18,8 @@ const SEAT_ANGLES_BY_COUNT: Record<number, number[]> = {
 function seatStyle(angle: number): React.CSSProperties {
   const rad = (angle * Math.PI) / 180;
   // Keep seats inside the padded container (rx=40%, ry=36% of the inner area)
-  const x = 50 + 40 * Math.cos(rad);
-  const y = 50 + 36 * Math.sin(rad);
+  const x = 50 + 44 * Math.cos(rad);
+  const y = 50 + 40 * Math.sin(rad);
   return {
     position: 'absolute',
     left: `${x}%`,
@@ -34,10 +34,8 @@ export default function PokerTable({ state, playerId }: Props) {
   const angles = SEAT_ANGLES_BY_COUNT[count] ?? SEAT_ANGLES_BY_COUNT[6];
 
   return (
-    // Outer wrapper: padding makes room for seats that sit on the rim
-    <div className="relative w-full mx-auto px-[6%] py-[7%]">
-      {/* Aspect-ratio inner box */}
-      <div className="relative w-full" style={{ paddingTop: '38%' }}>
+    <div className="relative w-full mx-auto" style={{ maxWidth: '900px' }}>
+      <div className="relative w-full" style={{ paddingTop: '42%' }}>
         <div className="absolute inset-0">
           {/* Outer rim */}
           <div className="absolute inset-0 rounded-[50%] bg-amber-900 shadow-2xl" />
