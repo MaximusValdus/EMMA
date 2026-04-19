@@ -12,7 +12,7 @@ type Props = {
 export default function DiceCup({ minRank, onRollAndClaim, disabled }: Props) {
   const [rolled, setRolled] = useState(false);
   const [shaking, setShaking] = useState(false);
-  const [actualRoll, setActualRoll] = useState<{ d1: number; d2: number; label: string } | null>(null);
+  const [actualRoll, setActualRoll] = useState<{ d1: number; d2: number; label: string; rank: number } | null>(null);
   const [selectedClaim, setSelectedClaim] = useState<string>('');
 
   const validClaims = DICE_RANKS.slice(minRank === -1 ? 0 : minRank);
