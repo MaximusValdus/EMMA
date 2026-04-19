@@ -11,6 +11,8 @@ type Props = { roomId: string };
 export default function GameRoom({ roomId }: Props) {
   const { socket, gameState, playerId, error, roomId: ctxRoomId } = useGame();
   const [copied, setCopied] = useState(false);
+  const [nameInput, setNameInput] = useState('');
+  const [needsName, setNeedsName] = useState(false);
 
   const me = gameState?.players.find(p => p.id === playerId);
   const isHost = gameState?.hostId === playerId;
@@ -23,8 +25,19 @@ export default function GameRoom({ roomId }: Props) {
     if (!socket || !roomId) return;
     if (ctxRoomId === roomId) return;
     const stored = sessionStorage.getItem('emma-name');
-    if (stored) socket.emit('join-game', { roomId, name: stored });
+    if (stored) {
+      socket.emit('join-game', { roomId, name: stored });
+    } else {
+      setNeedsName(true);
+    }
   }, [socket, roomId, ctxRoomId]);
+
+  function handleJoin() {
+    if (!socket || !nameInput.trim()) return;
+    sessionStorage.setItem('emma-name', nameInput.trim());
+    socket.emit('join-game', { roomId, name: nameInput.trim() });
+    setNeedsName(false);
+  }
 
   function handleAddBot() { socket?.emit('add-bot', { roomId }); }
   function handleRemoveBot(botId: string) { socket?.emit('remove-bot', { roomId, botId }); }
@@ -40,6 +53,37 @@ export default function GameRoom({ roomId }: Props) {
     navigator.clipboard.writeText(window.location.href);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  if (needsName) {
+    return (
+      <div className="h-screen flex items-center justify-center p-4">
+        <div className="bg-gray-900 border border-amber-700 rounded-2xl p-8 w-full max-w-sm flex flex-col gap-4">
+          <h1 className="text-3xl font-bold text-amber-400 text-center">EMMA</h1>
+          <p className="text-gray-400 text-center text-sm">
+            You were invited to game <span className="text-amber-300 font-bold font-mono">{roomId}</span>
+          </p>
+          {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+          <input
+            type="text"
+            placeholder="Enter your name"
+            value={nameInput}
+            onChange={e => setNameInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleJoin()}
+            maxLength={20}
+            autoFocus
+            className="bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-amber-500"
+          />
+          <button
+            onClick={handleJoin}
+            disabled={!nameInput.trim()}
+            className="bg-amber-700 hover:bg-amber-600 text-white font-bold py-2 rounded-lg transition-colors disabled:opacity-40"
+          >
+            Join Game
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (!gameState) {
