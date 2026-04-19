@@ -123,7 +123,7 @@ export default function GameRoom({ roomId }: Props) {
       </div>
 
       {/* ── Bottom strip: actions + log ── */}
-      <div className="flex-1 min-h-0 flex gap-3 px-4 pb-4 pt-2">
+      <div className="flex-1 min-h-0 flex flex-col sm:flex-row gap-3 px-4 pb-4 pt-2">
 
         {/* Action panel */}
         <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-3">
@@ -162,16 +162,16 @@ export default function GameRoom({ roomId }: Props) {
           {(gameState.phase === 'rolling' || gameState.phase === 'claiming') && (
             <div className="bg-gray-900/80 border border-amber-800 rounded-xl p-3">
               {isMyTurn && me && me.lives > 0 ? (
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                   <p className="text-green-300 font-bold text-base shrink-0">Your Turn!</p>
-                  {canChallenge && (
-                    <button onClick={handleChallenge}
-                      className="shrink-0 px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded-xl font-bold transition-colors text-sm">
-                      🚨 Challenge!
-                    </button>
-                  )}
-                  {canChallenge && <span className="text-gray-500 text-xs shrink-0">— or —</span>}
-                  <div className="flex-1">
+                  <div className="flex flex-wrap items-center gap-3 w-full">
+                    {canChallenge && (
+                      <button onClick={handleChallenge}
+                        className="shrink-0 px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded-xl font-bold transition-colors text-sm">
+                        🚨 Challenge!
+                      </button>
+                    )}
+                    {canChallenge && <span className="text-gray-500 text-xs shrink-0">— or —</span>}
                     <DiceCup minRank={minRank} onRollAndClaim={handleRollAndClaim} disabled={false} />
                   </div>
                 </div>
@@ -239,7 +239,7 @@ export default function GameRoom({ roomId }: Props) {
         </div>
 
         {/* Game log */}
-        <div className="w-64 shrink-0 bg-gray-900/80 border border-gray-700 rounded-xl p-3 flex flex-col min-h-0">
+        <div className="sm:w-64 sm:shrink-0 h-36 sm:h-auto bg-gray-900/80 border border-gray-700 rounded-xl p-3 flex flex-col min-h-0">
           <GameLog entries={gameState.log} />
         </div>
       </div>
