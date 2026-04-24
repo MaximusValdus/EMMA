@@ -9,7 +9,7 @@ import { getRank } from '@/lib/game';
 type Props = { roomId: string };
 
 export default function GameRoom({ roomId }: Props) {
-  const { socket, gameState, playerId, error, roomId: ctxRoomId } = useGame();
+  const { socket, gameState, playerId, error } = useGame();
   const [copied, setCopied] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [needsName, setNeedsName] = useState(false);
@@ -23,14 +23,11 @@ export default function GameRoom({ roomId }: Props) {
 
   useEffect(() => {
     if (!socket || !roomId) return;
-    if (ctxRoomId === roomId) return;
     const stored = sessionStorage.getItem('emma-name');
-    if (stored) {
-      socket.emit('join-game', { roomId, name: stored });
-    } else {
-      setNeedsName(true);
-    }
-  }, [socket, roomId, ctxRoomId]);
+    if (!stored) { setNeedsName(true); return; }
+    // Always emit join-game — server handles reconnection gracefully
+    socket.emit('join-game', { roomId, name: stored });
+  }, [socket, roomId, playerId]); // re-run when playerId changes (reconnect)
 
   function handleJoin() {
     if (!socket || !nameInput.trim()) return;

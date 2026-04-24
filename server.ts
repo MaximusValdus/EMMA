@@ -221,8 +221,26 @@ app.prepare().then(() => {
     });
 
     socket.on('join-game', ({ roomId, name }: { roomId: string; name: string }) => {
-      const state = rooms.get(roomId.toUpperCase());
+      const rid = roomId.toUpperCase();
+      const state = rooms.get(rid);
       if (!state) { socket.emit('error', 'Game not found'); return; }
+
+      // Reconnection: player with same name already exists — update their socket id
+      const existing = state.players.find(p => p.name === name && !p.isBot);
+      if (existing) {
+        const oldEntry = [...socketToPlayer.entries()].find(([, v]) => v.playerId === existing.id);
+        if (oldEntry) socketToPlayer.delete(oldEntry[0]);
+        existing.id = socket.id;
+        existing.isConnected = true;
+        if (state.hostId === (oldEntry?.[1]?.playerId ?? '')) state.hostId = socket.id;
+        socketToPlayer.set(socket.id, { roomId: rid, playerId: socket.id });
+        socket.join(rid);
+        socket.emit('game-joined', { roomId: rid });
+        socket.emit('game-state', state);
+        io.to(rid).emit('game-state', state);
+        return;
+      }
+
       if (state.phase !== 'lobby') { socket.emit('error', 'Game already started'); return; }
       if (state.players.length >= 6) { socket.emit('error', 'Game is full'); return; }
 
@@ -238,10 +256,10 @@ app.prepare().then(() => {
 
       state.players.push(player);
       log(state, `${name} joined the game`, 'system');
-      socketToPlayer.set(socket.id, { roomId: roomId.toUpperCase(), playerId });
-      socket.join(roomId.toUpperCase());
-      socket.emit('game-joined', { roomId: roomId.toUpperCase() });
-      io.to(roomId.toUpperCase()).emit('game-state', state);
+      socketToPlayer.set(socket.id, { roomId: rid, playerId });
+      socket.join(rid);
+      socket.emit('game-joined', { roomId: rid });
+      io.to(rid).emit('game-state', state);
     });
 
     socket.on('add-bot', ({ roomId }: { roomId: string }) => {
