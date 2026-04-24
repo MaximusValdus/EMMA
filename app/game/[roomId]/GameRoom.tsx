@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useGame } from '@/lib/SocketContext';
 import PokerTable from '@/app/components/PokerTable';
 import DiceCup from '@/app/components/DiceCup';
@@ -13,6 +13,7 @@ export default function GameRoom({ roomId }: Props) {
   const [copied, setCopied] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [needsName, setNeedsName] = useState(false);
+  const joinedAsRef = useRef<string | null>(null); // tracks which playerId we've joined with
 
   const me = gameState?.players.find(p => p.id === playerId);
   const isHost = gameState?.hostId === playerId;
@@ -22,12 +23,13 @@ export default function GameRoom({ roomId }: Props) {
   const minRank = gameState?.currentClaim ? getRank(gameState.currentClaim) + 1 : 0;
 
   useEffect(() => {
-    if (!socket || !roomId) return;
+    if (!socket || !roomId || !playerId) return;
+    if (joinedAsRef.current === playerId) return; // already joined this connection
     const stored = sessionStorage.getItem('emma-name');
     if (!stored) { setNeedsName(true); return; }
-    // Always emit join-game — server handles reconnection gracefully
+    joinedAsRef.current = playerId;
     socket.emit('join-game', { roomId, name: stored });
-  }, [socket, roomId, playerId]); // re-run when playerId changes (reconnect)
+  }, [socket, roomId, playerId]);
 
   function handleJoin() {
     if (!socket || !nameInput.trim()) return;
@@ -92,7 +94,7 @@ export default function GameRoom({ roomId }: Props) {
   }
 
   return (
-    <div className="h-screen overflow-hidden flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
 
       {/* ── Header ── */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-amber-900/50 shrink-0">
