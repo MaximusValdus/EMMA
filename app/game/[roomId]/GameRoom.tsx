@@ -9,7 +9,7 @@ import { getRank } from '@/lib/game';
 type Props = { roomId: string };
 
 export default function GameRoom({ roomId }: Props) {
-  const { socket, gameState, playerId, error } = useGame();
+  const { socket, gameState, playerId, error, clearError } = useGame();
   const [copied, setCopied] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [needsName, setNeedsName] = useState(false);
@@ -21,6 +21,10 @@ export default function GameRoom({ roomId }: Props) {
   const isMyTurn = currentPlayer?.id === playerId;
   const canChallenge = isMyTurn && !!gameState?.currentClaim && gameState?.phase === 'rolling';
   const minRank = gameState?.currentClaim ? getRank(gameState.currentClaim) + 1 : 0;
+
+  useEffect(() => {
+    clearError();
+  }, [roomId]);
 
   useEffect(() => {
     if (!socket || !roomId || !playerId) return;

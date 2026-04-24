@@ -39,7 +39,7 @@ export default function PokerTable({ state, playerId }: Props) {
   return (
     // Outer: fixed aspect ratio container. paddingTop drives height.
     // Extra px/py gives breathing room so seats don't get clipped.
-    <div className="relative w-full mx-auto" style={{ maxWidth: '860px', paddingTop: '44%' }}>
+    <div className="relative w-full mx-auto" style={{ maxWidth: '860px', paddingTop: 'min(36%, 36vh)' }}>
       <div className="absolute inset-0">
         {/* Outer rim — inset so seats can overlap the edge */}
         <div className="absolute inset-x-[8%] inset-y-[10%] rounded-[50%] bg-amber-900 shadow-2xl" />
